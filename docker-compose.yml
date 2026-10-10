@@ -1,6 +1,6 @@
 services:
   mercheck:
-    build: .
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER:-amoszp}/mercheck:${MERCHECK_TAG:-latest}
     container_name: mercheck
     restart: unless-stopped
     ports:
