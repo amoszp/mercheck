@@ -1,7 +1,9 @@
 import { createInitialState } from '../initialData.js';
 import { createId } from './ids.js';
 
-export const STORAGE_KEY = 'mercheck-hub-data';
+export const STORAGE_KEY = 'mercheck-data';
+// Key used before the rename; read once so existing lists carry over.
+const LEGACY_STORAGE_KEY = 'mercheck-hub-data';
 
 const cleanText = (value, fallback) => {
   const text = typeof value === 'string' ? value.trim() : '';
@@ -36,7 +38,7 @@ export const normalizeState = (raw) => {
 
 export const loadState = () => {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem(LEGACY_STORAGE_KEY);
     if (!raw) return createInitialState();
     return normalizeState(JSON.parse(raw)) ?? createInitialState();
   } catch {

@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 
-export const SETTINGS_KEY = 'mercheck-hub-settings';
+export const SETTINGS_KEY = 'mercheck-settings';
+// Key used before the rename; read once so saved preferences carry over.
+const LEGACY_SETTINGS_KEY = 'mercheck-hub-settings';
 
 // `themeColor` tints the browser / status bar; `swatch` previews the theme in
 // the settings panel (background on one half, accent on the other).
@@ -21,7 +23,9 @@ const DEFAULTS = { theme: 'gold', showQuantity: true };
 
 const loadSettings = () => {
   try {
-    const raw = JSON.parse(localStorage.getItem(SETTINGS_KEY));
+    const raw = JSON.parse(
+      localStorage.getItem(SETTINGS_KEY) ?? localStorage.getItem(LEGACY_SETTINGS_KEY),
+    );
     return {
       theme: raw?.theme in THEMES ? raw.theme : DEFAULTS.theme,
       showQuantity: raw?.showQuantity !== false,

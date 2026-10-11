@@ -9,12 +9,12 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg'],
       manifest: {
-        name: 'Mercheck Hub',
+        name: 'Mercheck',
         short_name: 'Mercheck',
-        description: 'Mobile-first shopping list hub',
+        description: 'Mobile-first shopping list app',
         theme_color: '#100c05',
         // Matches the app icon's own backdrop so the splash screen is seamless.
-        background_color: '#0f0a12',
+        background_color: '#e2b53c',
         display: 'standalone',
         orientation: 'portrait',
         scope: '/',
