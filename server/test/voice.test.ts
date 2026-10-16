@@ -74,3 +74,28 @@ test("query text tolerates double encoding", () => {
   assert.equal(queryText("pasta%20de%20dientes"), "pasta de dientes");
   assert.equal(queryText(42), "");
 });
+
+test("several items: existing ones marked, new one in the named list, one answer", () => {
+  const store = seeded();
+  const q = say(store, ME, "leche, queso batido y arena en Anodesin");
+  assert.equal(q, 'Marco "Leche Semi sin lactosa" de MERCHEKAO y "Queso batido" de MERCHEKAO. Creo "Arena" en ANODESIN. ¿Lo hago?');
+  assert.equal(answer(store, ME, "sí"), 'Hecho: "Leche Semi sin lactosa" y "Queso batido" por comprar; creado "Arena" en ANODESIN.');
+  assert.equal(item(store, 0, "milk").checked, true);
+  assert.ok(store.getState(ME).lists[1].items.some((i) => i.name === "Arena" && i.checked));
+});
+
+test("several items: new ones without a list are created where the answer says", () => {
+  const store = seeded();
+  const q = say(store, ME, "leche y arena y pilas");
+  assert.match(q, /Creo "Arena" y "Pilas"\. ¿En qué lista creo los nuevos\?/);
+  assert.match(answer(store, ME, "en año de sin"), /creados "Arena" en ANODESIN y "Pilas" en ANODESIN/);
+  assert.equal(item(store, 0, "milk").checked, true);
+});
+
+test("several items: already marked ones are just mentioned; no changes nothing", () => {
+  const store = seeded();
+  assert.equal(say(store, ME, "huevos y leche"), 'Marco "Leche Semi sin lactosa" de MERCHEKAO. "Huevos" ya estaba por comprar. ¿Lo hago?');
+  assert.equal(answer(store, ME, "no"), "Vale, no cambio nada.");
+  assert.equal(item(store, 0, "milk").checked, false);
+  assert.equal(say(store, ME, "huevos y huevos"), '"Huevos" y "Huevos" ya estaban por comprar.');
+});

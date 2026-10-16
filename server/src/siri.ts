@@ -62,7 +62,7 @@ export function normalize(text: string): string {
 }
 
 /** Looser key for names Siri may spell differently: no spaces, no h, k → c, v → b. */
-function loose(text: string): string {
+export function loose(text: string): string {
   return normalize(text).replace(/\s+/g, "").replace(/h/g, "").replace(/k/g, "c").replace(/v/g, "b");
 }
 
@@ -76,7 +76,7 @@ function sameWord(query: string, word: string): boolean {
 }
 
 /** 0 = no match; higher is closer. */
-function score(query: string, itemName: string): number {
+export function score(query: string, itemName: string): number {
   const q = normalize(query);
   const name = normalize(itemName);
   if (!q) return 0;

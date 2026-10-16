@@ -79,6 +79,7 @@ Matching ignores case and accents, accepts part of a name ("milk" finds "Semi-sk
 
 - `GET /api/siri/say?key=…&text=…` — looks the item up like `lookup`. One option: answers the yes/no question. Several: the question followed by a numbered list ("1: … 2: …"). Nothing to do: just says why.
 - `GET /api/siri/answer?key=…&text=…` — "sí"/"no", a number ("el dos", "3"), or part of a choice's name ("batido", a list name) carries it out and answers what was done. The open question lasts 10 minutes.
+- Several items in one sentence (`"leche, pan y arena en Anodesin"`, split on commas and "y") are handled together: each goes to its closest match (or is created, in the list named after it), the whole plan is read back once, and one answer runs it — "sí", or the list name for new items that didn't name one.
 
 ## Development
 
