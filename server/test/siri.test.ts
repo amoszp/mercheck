@@ -108,3 +108,11 @@ test("options can't reach another user's lists", () => {
   assert.throws(() => apply(store, 2, "mark:super:milk"));
   assert.match(lookup(store, 2, "leche").speak, /No tienes ninguna lista/);
 });
+
+test("menu maps each label to its option", () => {
+  const store = seeded();
+  const answer = lookup(store, ME, "queso");
+  assert.ok(answer.options.length > 1);
+  assert.deepEqual(answer.menu, Object.fromEntries(answer.options.map((o) => [o.label, o.option])));
+  assert.deepEqual(lookup(store, ME, "huevos").menu, {});
+});

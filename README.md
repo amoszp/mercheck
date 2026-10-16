@@ -66,7 +66,7 @@ Lists saved in a browser by earlier versions (local storage) are imported once, 
 
 Both routes take a per-user API key from the account service in `Authorization: Bearer <key>`.
 
-- `POST /api/siri/lookup` `{ text }` — never changes anything. Understands `"milk"`, `"add the milk"` or `"milk en <list name>"` (Spanish phrasing), and answers `{ speak, options: [{ label, option }] }`:
+- `POST /api/siri/lookup` `{ text }` — never changes anything. Understands `"milk"`, `"add the milk"` or `"milk en <list name>"` (Spanish phrasing), and answers `{ speak, options: [{ label, option }], menu: { label: option } }` (`menu` is the same options keyed by label, so a shortcut can show the labels and look up the chosen one):
   - one match → one option to mark it as needed (the shortcut asks yes/no),
   - several matches → one option per match plus "create it new" options (the shortcut shows a menu),
   - no match → one "create in <list>" option per list (or just the named list),

@@ -8,6 +8,8 @@ import { OpError, type Store } from "./store";
  * possible actions, each one a flat `option` string the shortcut sends back to
  * `apply` once the user has confirmed (one option) or picked one (several).
  * No options means there is nothing to do; the sentence says why.
+ * `menu` holds the same options as label → option, the shape a shortcut's
+ * "Choose from List" can show directly and look the choice up in.
  */
 
 export interface SiriOption {
@@ -18,6 +20,7 @@ export interface SiriOption {
 export interface SiriAnswer {
   speak: string;
   options: SiriOption[];
+  menu: Record<string, string>;
 }
 
 const MAX_MATCHES = 6;
@@ -134,12 +137,23 @@ export function parse(text: string, lists: { id: string; name: string }[]): Pars
   return { name: name.charAt(0).toUpperCase() + name.slice(1), listId };
 }
 
+function answer(speak: string, options: SiriOption[] = []): SiriAnswer {
+  const menu: Record<string, string> = {};
+  for (const { label, option } of options) {
+    // Labels are the keys, so two identical ones get a number.
+    let key = label;
+    for (let n = 2; key in menu; n++) key = `${label} ${n}`;
+    menu[key] = option;
+  }
+  return { speak, options, menu };
+}
+
 export function lookup(store: Store, userId: number, text: string): SiriAnswer {
   const state = store.getState(userId);
-  if (state.lists.length === 0) return { speak: "No tienes ninguna lista en Mercheck.", options: [] };
+  if (state.lists.length === 0) return answer("No tienes ninguna lista en Mercheck.");
 
   const { name, listId } = parse(text, state.lists);
-  if (!normalize(name)) return { speak: "No he entendido qué quieres apuntar.", options: [] };
+  if (!normalize(name)) return answer("No he entendido qué quieres apuntar.");
 
   const lists = listId ? state.lists.filter((l) => l.id === listId) : state.lists;
   const scored = lists
@@ -157,30 +171,26 @@ export function lookup(store: Store, userId: number, text: string): SiriAnswer {
 
   if (matches.length === 0) {
     if (lists.length === 1) {
-      return { speak: `"${name}" no está en ${lists[0].name}. ¿Lo creo?`, options: createOptions };
+      return answer(`"${name}" no está en ${lists[0].name}. ¿Lo creo?`, createOptions);
     }
-    return { speak: `"${name}" no está en tus listas. ¿En qué lista lo creo?`, options: createOptions };
+    return answer(`"${name}" no está en tus listas. ¿En qué lista lo creo?`, createOptions);
   }
 
   if (matches.length === 1) {
     const { list, item } = matches[0];
-    if (item.checked) return { speak: `"${item.name}" ya está por comprar en ${list.name}.`, options: [] };
-    return {
-      speak: `¿Marco "${item.name}" de ${list.name} como por comprar?`,
-      options: [{ label: `${item.name} (${list.name})`, option: `mark:${list.id}:${item.id}` }],
-    };
+    if (item.checked) return answer(`"${item.name}" ya está por comprar en ${list.name}.`);
+    return answer(`¿Marco "${item.name}" de ${list.name} como por comprar?`, [
+      { label: `${item.name} (${list.name})`, option: `mark:${list.id}:${item.id}` },
+    ]);
   }
 
-  return {
-    speak: `Hay ${matches.length} parecidos. ¿Cuál es?`,
-    options: [
-      ...matches.map(({ list, item }) => ({
-        label: `${item.name} (${list.name})${item.checked ? " · ya por comprar" : ""}`,
-        option: `mark:${list.id}:${item.id}`,
-      })),
-      ...createOptions,
-    ],
-  };
+  return answer(`Hay ${matches.length} parecidos. ¿Cuál es?`, [
+    ...matches.map(({ list, item }) => ({
+      label: `${item.name} (${list.name})${item.checked ? " · ya por comprar" : ""}`,
+      option: `mark:${list.id}:${item.id}`,
+    })),
+    ...createOptions,
+  ]);
 }
 
 export function apply(store: Store, userId: number, option: string): { speak: string } {
