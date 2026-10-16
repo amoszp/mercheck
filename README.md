@@ -75,6 +75,11 @@ Both routes take a per-user API key from the account service in `Authorization: 
 
 Matching ignores case and accents, accepts part of a name ("milk" finds "Semi-skimmed milk") and simple plurals.
 
+**Plain-text conversation** (for a minimal shortcut made of web addresses only, no headers or body). The key goes in `?key=` and every answer is a `text/plain` sentence, errors included (`401` for a bad key).
+
+- `GET /api/siri/say?key=…&text=…` — looks the item up like `lookup`. One option: answers the yes/no question. Several: the question followed by a numbered list ("1: … 2: …"). Nothing to do: just says why.
+- `GET /api/siri/answer?key=…&text=…` — "sí"/"no", a number ("el dos", "3"), or part of a choice's name ("batido", a list name) carries it out and answers what was done. The open question lasts 10 minutes.
+
 ## Development
 
 ```bash

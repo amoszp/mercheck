@@ -10,8 +10,11 @@ import {
   requireUser,
   setSessionCookie,
   signup,
+  type User,
+  verify,
 } from "./auth";
 import * as siri from "./siri";
+import * as voice from "./voice";
 import { OpError, type Store } from "./store";
 
 const wrap =
@@ -95,6 +98,37 @@ export function createRouter(store: Store): Router {
       res.status(204).send();
     })
   );
+
+  // ---------- voice (minimal iPhone Shortcut: plain text in, plain text out) ----------
+  // GET so the shortcut needs nothing but a web address; the API key comes as
+  // ?key= and every answer is a sentence for Siri to read, errors included.
+
+  const voiceRoute = (handle: (user: User, text: string) => string) =>
+    async (req: Request, res: Response, next: NextFunction) => {
+      res.set("Cache-Control", "no-store").type("text/plain; charset=utf-8");
+      const key = typeof req.query.key === "string" ? req.query.key.trim() : "";
+      try {
+        const user = key ? await verify(key) : null;
+        if (!user) {
+          res.status(401).send("No reconozco la clave de este atajo.");
+          return;
+        }
+        res.send(handle(user, voice.queryText(req.query.text)));
+      } catch (err) {
+        if (err instanceof AccountsUnavailable) {
+          res.status(503).send("Mercheck no puede comprobar tu clave ahora mismo. Prueba en un rato.");
+          return;
+        }
+        if (err instanceof OpError) {
+          res.status(400).send("Eso ya no existe en tus listas. No he cambiado nada.");
+          return;
+        }
+        next(err);
+      }
+    };
+
+  router.get("/siri/say", voiceRoute((user, text) => voice.say(store, user.id, text)));
+  router.get("/siri/answer", voiceRoute((user, text) => voice.answer(store, user.id, text)));
 
   router.use(requireUser());
 
