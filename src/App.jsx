@@ -10,8 +10,8 @@ import { useSettings } from './lib/settings.js';
 
 const cardTransition = { type: 'spring', stiffness: 260, damping: 28 };
 
-function App() {
-  const lists = useLists();
+function App({ user, initialState, onSignOut, onSignedOut }) {
+  const lists = useLists(initialState, onSignedOut);
   const { data, toast, dismissToast, runUndo, addList } = lists;
   const [settings, updateSettings] = useSettings();
 
@@ -164,7 +164,7 @@ function App() {
 
       <footer className="relative z-10 flex items-center justify-center gap-2 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-1">
         <Dock lists={data.lists} activeIndex={active} onSelect={scrollToIndex} />
-        <SettingsMenu settings={settings} onChange={updateSettings} />
+        <SettingsMenu settings={settings} onChange={updateSettings} user={user} onSignOut={onSignOut} />
       </footer>
 
       <Toast toast={toast} onUndo={runUndo} onDismiss={dismissToast} />

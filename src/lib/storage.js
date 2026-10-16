@@ -1,9 +1,12 @@
-import { createInitialState } from '../initialData.js';
 import { createId } from './ids.js';
 
-export const STORAGE_KEY = 'mercheck-data';
-// Key used before the rename; read once so existing lists carry over.
+// Lists used to live only in this browser. They are now kept on the server;
+// what's still here is read once, at the first sign-in, to import it.
+const STORAGE_KEY = 'mercheck-data';
+// Key used before the rename to Mercheck.
 const LEGACY_STORAGE_KEY = 'mercheck-hub-data';
+// Set once an import has happened on this device, so it never runs twice.
+const IMPORTED_KEY = 'mercheck-imported';
 
 const cleanText = (value, fallback) => {
   const text = typeof value === 'string' ? value.trim() : '';
@@ -36,20 +39,23 @@ export const normalizeState = (raw) => {
   return { lists: raw.lists.map(normalizeList).filter(Boolean) };
 };
 
-export const loadState = () => {
+/** Lists saved in this browser that haven't been imported yet, or null. */
+export const readLocalLists = () => {
   try {
+    if (localStorage.getItem(IMPORTED_KEY)) return null;
     const raw = localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem(LEGACY_STORAGE_KEY);
-    if (!raw) return createInitialState();
-    return normalizeState(JSON.parse(raw)) ?? createInitialState();
+    const state = raw ? normalizeState(JSON.parse(raw)) : null;
+    return state?.lists.length ? state : null;
   } catch {
-    return createInitialState();
+    return null;
   }
 };
 
-export const saveState = (state) => {
+// The old data stays where it was, as a backup; only the flag is added.
+export const markImported = () => {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    localStorage.setItem(IMPORTED_KEY, new Date().toISOString());
   } catch {
-    // Storage full or blocked (private mode): keep working in memory.
+    // Storage blocked: the server refuses a second import anyway.
   }
 };

@@ -1,14 +1,14 @@
 import { useCallback, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { SlidersHorizontal } from 'lucide-react';
+import { LogOut, SlidersHorizontal } from 'lucide-react';
 import { THEMES } from '../lib/settings.js';
 import { useDismiss } from '../lib/useDismiss.js';
 
 /**
  * Round glass button next to the dock that opens the display settings:
- * theme (radio cards) and quantity visibility (switch).
+ * theme (radio cards), quantity visibility (switch) and the account.
  */
-export default function SettingsMenu({ settings, onChange }) {
+export default function SettingsMenu({ settings, onChange, user, onSignOut }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef(null);
   const close = useCallback(() => setOpen(false), []);
@@ -85,6 +85,19 @@ export default function SettingsMenu({ settings, onChange }) {
                     settings.showQuantity ? 'translate-x-5' : 'translate-x-0'
                   }`}
                 />
+              </button>
+            </div>
+
+            <p className="px-1 pb-1 pt-4 text-xs font-medium uppercase tracking-wider text-fg/50">Account</p>
+            <div className="flex items-center justify-between gap-3 px-1 py-1">
+              <span className="min-w-0 truncate text-[15px] text-fg/90">{user.displayName || user.username}</span>
+              <button
+                type="button"
+                onClick={onSignOut}
+                className="flex shrink-0 items-center gap-1.5 rounded-xl border border-fg/10 px-3 py-1.5 text-sm text-fg/80 transition hover:bg-fg/10 active:scale-95"
+              >
+                <LogOut size={15} />
+                Sign out
               </button>
             </div>
           </motion.div>

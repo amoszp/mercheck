@@ -4,4 +4,17 @@ services:
     container_name: mercheck
     restart: unless-stopped
     ports:
-      - "1102:80"
+      - "1102:4480"
+    env_file:
+      - ./server/.env
+    volumes:
+      # Host-side folder that keeps the SQLite database across updates.
+      - ./data:/app/server/data
+    networks:
+      - default
+      - accounts
+
+networks:
+  accounts:
+    # Created by the accounts service's compose file.
+    external: true

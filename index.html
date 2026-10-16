@@ -12,17 +12,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Mercheck" />
     <title>Mercheck</title>
-    <script>
-      // Apply the saved theme before first paint so the app never flashes the
-      // default palette. Keep in sync with src/lib/settings.js.
-      try {
-        var saved = JSON.parse(localStorage.getItem('mercheck-settings') || localStorage.getItem('mercheck-hub-settings'));
-        if (saved && saved.theme === 'rose') {
-          document.documentElement.dataset.theme = 'rose';
-          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f5eee3');
-        }
-      } catch (e) {}
-    </script>
+    <!-- Applies the saved theme before first paint. Keep in sync with src/lib/settings.js. -->
+    <script src="/theme-init.js"></script>
   </head>
   <body>
     <div id="root"></div>

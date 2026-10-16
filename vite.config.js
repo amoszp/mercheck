@@ -40,7 +40,13 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        // The API is always live: never answer it from the offline cache.
+        navigateFallbackDenylist: [/^\/api\//],
       },
     }),
   ],
+  // `npm run dev` talks to a locally running server (see server/).
+  server: {
+    proxy: { '/api': 'http://localhost:4480' },
+  },
 });
